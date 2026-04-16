@@ -1,0 +1,28 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+arms_cache/
+
+# Build outputs
+dist/
+build/
+.next/
+.out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun.lockb
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Editor folders
+.vscode/
+.idea/

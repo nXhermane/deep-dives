@@ -1,0 +1,9 @@
+{
+  "name": "test_react_native_cli_with_eas",
+  "displayName": "test_react_native_cli_with_eas",
+  "extra": {
+    "eas": {
+      "projectId": "5d1ef594-df7f-4ae8-bd32-63c34ec7a79e"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+[package]
+name = "task-tracker-cli"
+version = "0.1.0"
+edition = "2021"
+authors = ["Hermane <nxhermane@users.noreply.github.com>"]
+description = "A lightweight, fast Rust command-line task tracker for managing TODOs and simple tasks locally. Designed to be minimal, scriptable, and user-friendly with beautiful formatted output."
+homepage = "https://github.com/nXhermane/rust_task-tracker_cli"
+repository = "https://github.com/nXhermane/rust_task-tracker_cli"
+documentation = "https://github.com/nXhermane/rust_task-tracker_cli/blob/main/README.md"
+readme = "README.md"
+license = "MIT"
+keywords = ["cli", "task-manager", "productivity", "todo", "command-line"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+chrono = "0.4.42"
+json = "0.12.4"
+prettytable-rs = "0.10.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
