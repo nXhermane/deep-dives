@@ -10,5 +10,7 @@ Ce dépôt regroupe mes explorations techniques, mes implémentations "from scra
 
 Chaque section est divisée par langage (`typescript/`, `go/`, etc.).
 
+## Roadmap.sh project 
+- [Rust - Github User Activity](https://roadmap.sh/projects/github-user-activity)
 ---
 *Explorations par Hermane.*

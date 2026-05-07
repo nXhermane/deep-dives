@@ -54,3 +54,6 @@ Ce projet consiste en une application CLI qui permet de récupérer les événem
 *   **Format d'affichage** : Proposer des formats d'affichage alternatifs (JSON brut, format plus détaillé, etc.).
 *   **Historique** : Ajouter la possibilité de spécifier le nombre d'événements à récupérer.
 *   **Mise en cache** : Mettre en cache les résultats pour éviter de surcharger l'API lors de requêtes successives rapprochées.
+
+---
+[ROADMAP SH PROJECT: https://roadmap.sh/projects/github-user-activity](https://roadmap.sh/projects/github-user-activity)
