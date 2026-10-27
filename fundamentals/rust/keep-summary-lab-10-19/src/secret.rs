@@ -1,4 +1,4 @@
-use crate::lib::SimpleDate;
+use crate::time::SimpleDate;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Environment {
