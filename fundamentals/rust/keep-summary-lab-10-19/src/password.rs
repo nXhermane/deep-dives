@@ -8,6 +8,12 @@ pub struct PasswordPayload {
     raw: String,
 }
 
+impl PasswordPayload {
+    pub fn new(raw: String) -> Self {
+        PasswordPayload { raw }
+    }
+}
+
 impl HasCategory for PasswordPayload {
     const CATEGORY: Category = Category::Password;
 }
