@@ -57,9 +57,14 @@ impl<T: HasCategory> Secret<T> {
         &self.core
     }
 
+    pub fn core_mut(&mut self) -> &mut CoreSecret {
+        &mut self.core
+    }
+    
     pub fn value(&self) -> &T {
         &self.value
     }
+
     pub fn category(&self) -> Category {
         T::CATEGORY
     }

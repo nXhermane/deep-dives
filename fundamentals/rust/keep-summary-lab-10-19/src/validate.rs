@@ -3,8 +3,7 @@ use crate::secret::{HasCategory, Secret};
 #[derive(Debug)]
 pub enum ValidationError {
     EmptyTitle,
-    ShortPassword,
-    DuplicateService,
+    EmptyServiceName,
 }
 
 pub trait Validate {
@@ -14,6 +13,14 @@ pub trait Validate {
 impl<T: HasCategory + Validate> Validate for Secret<T> {
     fn validate(&self) -> Result<(), ValidationError> {
         // validate core element here
+        if self.core().title.trim().is_empty() {
+            return Err(ValidationError::EmptyTitle);
+        }
+
+        if self.core().service.trim().is_empty() {
+            return Err(ValidationError::EmptyServiceName);
+        }
+
         self.value().validate()
     }
 }
