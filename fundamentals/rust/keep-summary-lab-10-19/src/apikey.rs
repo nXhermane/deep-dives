@@ -18,7 +18,10 @@ pub struct ApiKeyPayload {
 
 impl ApiKeyPayload {
     pub fn new(key: String, scopes: Vec<ApiScope>) -> Self {
-        ApiKeyPayload { key, scopes }
+        ApiKeyPayload {
+            key: key.trim().to_string(),
+            scopes,
+        }
     }
 }
 
@@ -54,10 +57,12 @@ impl Validate for ApiKeyPayload {
             return Err(ApiKeyValidationError::TooShort.into());
         }
 
-        let (prefix, body) = trimmed
-            .split_once('_')
-            .or_else(|| trimmed.split_once('-'))
+        let sep_pos = trimmed
+            .find(|c| c == '_' || c == '-')
             .ok_or(ApiKeyValidationError::InvalidFormat)?;
+
+        let prefix = &trimmed[..sep_pos];
+        let body = &trimmed[sep_pos + 1..];
 
         if !(2..=12).contains(&prefix.len()) || !prefix.chars().all(|c| c.is_ascii_alphanumeric()) {
             return Err(ApiKeyValidationError::InvalidFormat.into());
@@ -66,7 +71,7 @@ impl Validate for ApiKeyPayload {
         if !(24..=64).contains(&body.len())
             || !body
                 .chars()
-                .all(|c| c.is_ascii_alphabetic() || c == '_' || c == '-')
+                .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
         {
             return Err(ApiKeyValidationError::InvalidFormat.into());
         }
