@@ -1,13 +1,9 @@
-use std::collections::{hash_map, HashMap};
+use std::collections::HashMap;
 
 use crate::{
-    audit::{Auditable, AuditablePayload},
-    lib::SimpleDate,
-    secret::{
-        self, CoreSecret, Environment, HasCategory, Secret,
-        Status::{Disable, Enable},
-    },
-    validate::{Validate, ValidationError},
+    audit::{Auditable, AuditablePayload}, lib::SimpleDate, secret::{
+        Category, CoreSecret, Environment, HasCategory, Secret, Status::{self, Disable, Enable},
+    }, validate::{Validate, ValidationError},
 };
 
 #[derive(Debug)]
@@ -39,8 +35,9 @@ pub struct SecretUpdate {
     pub expires_at: Option<Option<SimpleDate>>,
 }
 
-trait VaultElementTrait: Auditable + Validate {
+pub trait VaultElementTrait: Auditable + Validate {
     fn core(&self) -> &CoreSecret;
+    fn category(&self) -> Category;
     fn apply_update(&mut self, update: &SecretUpdate) -> ();
     fn enable(&mut self) -> ();
     fn disable(&mut self) -> ();
@@ -49,6 +46,10 @@ trait VaultElementTrait: Auditable + Validate {
 impl<T: AuditablePayload + HasCategory + Validate> VaultElementTrait for Secret<T> {
     fn core(&self) -> &CoreSecret {
         Secret::core(self)
+    }
+
+    fn category(&self) -> Category {
+        Secret::category(self)
     }
 
     fn apply_update(&mut self, update: &SecretUpdate) {
@@ -244,7 +245,7 @@ impl Vault {
     // pub fn reveal_secret(&mut self, id: u64, auth: &Auth) -> Result<String, VaultError> {
     //     todo!()
     // }
-    
+
     // avancy searching
     pub fn find_first<F>(&self, predicate: F) -> Option<&dyn VaultElementTrait>
     where
@@ -257,6 +258,15 @@ impl Vault {
         }
         None
     }
+
+    pub fn filter(&self, filter: &SecretFilter) -> Vec<&dyn VaultElementTrait> {
+        self.secrets
+            .iter()
+            .map(|boxed| boxed.as_ref())
+            .filter(|secret| filter.matches(*secret))
+            .collect()
+    }
+
     // pub fn iter(&self) -> impl Iterator<Item = &dyn VaultElementTrait> {
     //     todo!()
     // }
@@ -267,5 +277,45 @@ impl Vault {
             .iter_mut()
             .find(|secret| secret.core().id == id)
             .map(|boxed| &mut **boxed as &mut dyn VaultElementTrait)
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct SecretFilter {
+    pub env: Option<Environment>,
+    pub status: Option<Status>,
+    pub category: Option<Category>,
+    pub service: Option<String>,
+    pub has_expiration: Option<bool>,
+}
+
+impl SecretFilter {
+    pub fn matches(&self, secret: &dyn VaultElementTrait) -> bool {
+        if let Some(env) = self.env {
+            if secret.core().env != env {
+                return false;
+            }
+        }
+        if let Some(status) = self.status {
+            if secret.core().status != status {
+                return false;
+            }
+        }
+        if let Some(category) = self.category {
+            if secret.category() != category {
+                return false;
+            }
+        }
+        if let Some(ref service) = self.service {
+            if &secret.core().service != service {
+                return false;
+            }
+        }
+        if let Some(has_exp) = self.has_expiration {
+            if secret.core().expires_at.is_some() != has_exp {
+                return false;
+            }
+        }
+        true
     }
 }
