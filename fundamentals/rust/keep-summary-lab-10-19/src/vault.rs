@@ -2,18 +2,27 @@ use std::collections::{hash_map, HashMap};
 
 use crate::{
     audit::{Auditable, AuditablePayload},
-    secret::{self, CoreSecret, HasCategory, Secret},
+    lib::SimpleDate,
+    secret::{
+        self, CoreSecret, Environment, HasCategory, Secret,
+        Status::{Disable, Enable},
+    },
     validate::{Validate, ValidationError},
 };
 
 #[derive(Debug)]
 pub enum VaultError {
-    NotFound,
+    NotFound(SearchKey),
     DuplicateId,
     InvalidData,
     PermissionDenied,
     OperationFailed,
     Validation(ValidationError),
+}
+#[derive(Debug)]
+pub enum SearchKey {
+    Id(u64),
+    Service(String),
 }
 
 impl From<ValidationError> for VaultError {
@@ -22,13 +31,47 @@ impl From<ValidationError> for VaultError {
     }
 }
 
+#[derive(Debug, Default, Clone)]
+pub struct SecretUpdate {
+    pub service: Option<String>,
+    pub title: Option<String>,
+    pub env: Option<Environment>,
+    pub expires_at: Option<Option<SimpleDate>>,
+}
+
 trait VaultElementTrait: Auditable + Validate {
     fn core(&self) -> &CoreSecret;
+    fn apply_update(&mut self, update: &SecretUpdate) -> ();
+    fn enable(&mut self) -> ();
+    fn disable(&mut self) -> ();
 }
 
 impl<T: AuditablePayload + HasCategory + Validate> VaultElementTrait for Secret<T> {
     fn core(&self) -> &CoreSecret {
         Secret::core(self)
+    }
+
+    fn apply_update(&mut self, update: &SecretUpdate) {
+        if let Some(service) = &update.service {
+            self.core_mut().service = service.clone();
+        }
+        if let Some(title) = &update.title {
+            self.core_mut().title = title.clone();
+        }
+        if let Some(env) = &update.env {
+            self.core_mut().env = env.clone();
+        }
+        if let Some(expire_at) = &update.expires_at {
+            self.core_mut().expires_at = expire_at.clone();
+        }
+    }
+
+    fn disable(&mut self) -> () {
+        self.core_mut().status = Disable;
+    }
+
+    fn enable(&mut self) -> () {
+        self.core_mut().status = Enable;
     }
 }
 
@@ -47,6 +90,32 @@ impl Vault {
         }
     }
 
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            secrets: Vec::with_capacity(capacity),
+            secret_index: HashMap::new(),
+            next_id: 0,
+        }
+    }
+
+    // stats
+    pub fn next_id(&self) -> u64 {
+        self.next_id
+    }
+
+    pub fn len(&self) -> usize {
+        self.secrets.len()
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.secrets.capacity()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.secrets.is_empty()
+    }
+
+    // adding / basic searching
     pub fn add<T>(&mut self, secret: Secret<T>) -> Result<(), VaultError>
     where
         T: AuditablePayload + HasCategory + Validate + 'static,
@@ -74,7 +143,7 @@ impl Vault {
         Ok(())
     }
 
-    pub fn get_by_id(&self, id: u64) -> Result<&dyn VaultElementTrait, VaultError> {
+    pub fn get_by_id(&self, id: u64) -> Option<&dyn VaultElementTrait> {
         // self.secrets
         //     .iter()
         //     .find(|secret| secret.core().id == id)
@@ -84,13 +153,119 @@ impl Vault {
         let maybe_secret = self.secrets.iter().find(|secret| secret.core().id == id);
 
         if let Some(boxed_secret) = maybe_secret {
-            Ok(boxed_secret.as_ref())
+            Some(boxed_secret.as_ref())
         } else {
-            Err(VaultError::NotFound)
+            None
         }
     }
 
-    pub fn get_next_id(&self) -> u64 {
-        self.next_id
+    pub fn get_by_service(&self, service: &str) -> Vec<&dyn VaultElementTrait> {
+        // let indices = self.secret_index.get(service);
+        // if let Some(indices) = indices {
+        //     indices.iter().map(|&i| self.secrets[i].as_ref()).collect()
+        // } else {
+        //     Vec::new()
+        // }
+        // or
+        self.secret_index
+            .get(service)
+            .map(|v| v.iter().map(|&i| self.secrets[i].as_ref()).collect())
+            .unwrap_or_default()
+    }
+
+    // mutations
+    pub fn enable(&mut self, id: u64) -> Result<(), VaultError> {
+        let secret = self
+            .get_by_id_mut(id)
+            .ok_or(VaultError::NotFound(SearchKey::Id(id)))?;
+        secret.enable();
+        Ok(())
+    }
+
+    pub fn disable(&mut self, id: u64) -> Result<(), VaultError> {
+        let secret = self
+            .get_by_id_mut(id)
+            .ok_or(VaultError::NotFound(SearchKey::Id(id)))?;
+        secret.disable();
+        Ok(())
+    }
+
+    pub fn delete(&mut self, id: u64) -> Result<(), VaultError> {
+        let idx = self
+            .secrets
+            .iter()
+            .position(|s| s.core().id == id)
+            .ok_or(VaultError::NotFound(SearchKey::Id(id)))?;
+
+        let removed_service = self.secrets[idx].core().service.clone();
+        let last_idx = self.secrets.len() - 1;
+
+        self.secrets.swap_remove(idx);
+
+        if let Some(indices) = self.secret_index.get_mut(&removed_service) {
+            indices.retain(|&i| i != idx);
+        }
+
+        if idx != last_idx {
+            let swapped_service = self.secrets[idx].core().service.clone();
+            if let Some(indices) = self.secret_index.get_mut(&swapped_service) {
+                for i in indices.iter_mut() {
+                    if *i == last_idx {
+                        *i = idx;
+                        break;
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub fn update_secret(&mut self, id: u64, update: &SecretUpdate) -> Result<(), VaultError> {
+        let secret = self
+            .get_by_id_mut(id)
+            .ok_or(VaultError::NotFound(SearchKey::Id(id)))?;
+
+        if let Some(title) = &update.title {
+            if title.trim().is_empty() {
+                return Err(VaultError::Validation(ValidationError::EmptyTitle));
+            }
+        }
+        if let Some(ref service) = update.service {
+            if service.trim().is_empty() {
+                return Err(VaultError::Validation(ValidationError::EmptyServiceName));
+            }
+        }
+
+        secret.apply_update(update);
+        Ok(())
+    }
+
+    // security
+    // pub fn reveal_secret(&mut self, id: u64, auth: &Auth) -> Result<String, VaultError> {
+    //     todo!()
+    // }
+    
+    // avancy searching
+    pub fn find_first<F>(&self, predicate: F) -> Option<&dyn VaultElementTrait>
+    where
+        F: Fn(&dyn VaultElementTrait) -> bool,
+    {
+        for boxed in &self.secrets {
+            if predicate(boxed.as_ref()) {
+                return Some(boxed.as_ref());
+            }
+        }
+        None
+    }
+    // pub fn iter(&self) -> impl Iterator<Item = &dyn VaultElementTrait> {
+    //     todo!()
+    // }
+
+    // private methods
+    fn get_by_id_mut(&mut self, id: u64) -> Option<&mut (dyn VaultElementTrait + '_)> {
+        self.secrets
+            .iter_mut()
+            .find(|secret| secret.core().id == id)
+            .map(|boxed| &mut **boxed as &mut dyn VaultElementTrait)
     }
 }
