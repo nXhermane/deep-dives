@@ -1,10 +1,6 @@
-pub mod audit;
-pub mod lib;
-pub mod password;
-pub mod secret;
-pub mod validate;
-pub mod vault;
+use keep_summary_lab_10_19::vault::Vault;
 
 fn main() {
-    println!("Hello, world!");
+    let vault = Vault::new();
+    println!("Vault contains {} elements!", vault.len());
 }
