@@ -49,7 +49,7 @@ impl<T: AuditablePayload + HasCategory + Validate> VaultElementTrait for Secret<
     }
 
     fn category(&self) -> Category {
-        self.category()
+        Secret::category(self)
     }
 
     fn apply_update(&mut self, update: &SecretUpdate) {
