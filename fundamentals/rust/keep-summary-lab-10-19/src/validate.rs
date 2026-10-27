@@ -4,6 +4,13 @@ use crate::secret::{HasCategory, Secret};
 pub enum ValidationError {
     EmptyTitle,
     EmptyServiceName,
+    Custom(String),
+}
+
+impl ValidationError {
+    pub fn new(msg: &str) -> Self {
+        ValidationError::Custom(msg.to_string())
+    }
 }
 
 pub trait Validate {

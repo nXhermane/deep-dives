@@ -1,9 +1,13 @@
 use std::collections::HashMap;
 
 use crate::{
-    audit::{Auditable, AuditablePayload}, lib::SimpleDate, secret::{
-        Category, CoreSecret, Environment, HasCategory, Secret, Status::{self, Disable, Enable},
-    }, validate::{Validate, ValidationError},
+    audit::{Auditable, AuditablePayload},
+    lib::SimpleDate,
+    secret::{
+        Category, CoreSecret, Environment, HasCategory, Secret,
+        Status::{self, Disable, Enable},
+    },
+    validate::{Validate, ValidationError},
 };
 
 #[derive(Debug)]

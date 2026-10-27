@@ -60,7 +60,7 @@ impl<T: HasCategory> Secret<T> {
     pub fn core_mut(&mut self) -> &mut CoreSecret {
         &mut self.core
     }
-    
+
     pub fn value(&self) -> &T {
         &self.value
     }
