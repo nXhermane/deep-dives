@@ -2,6 +2,10 @@ use std::collections::HashMap;
 
 use crate::{
     audit::{Auditable, AuditablePayload},
+    reveal::{
+        Auth::{self, Admin},
+        RevealablePayload,
+    },
     secret::{
         Category, CoreSecret, Environment, HasCategory, Secret,
         Status::{self, Disable, Enable},
@@ -39,15 +43,25 @@ pub struct SecretUpdate {
     pub expires_at: Option<Option<SimpleDate>>,
 }
 
+/// Jeton interne non instanciable en dehors de ce module (champ privé).
+/// Garantit que seules les méthodes du Vault peuvent autoriser l'accès et la révélation.
+pub struct InternalToken {
+    _private: (),
+}
+
 pub trait VaultElementTrait: Auditable + Validate {
     fn core(&self) -> &CoreSecret;
     fn category(&self) -> Category;
     fn apply_update(&mut self, update: &SecretUpdate) -> ();
     fn enable(&mut self) -> ();
     fn disable(&mut self) -> ();
+    fn internal_reveal(&self, _token: &InternalToken) -> String;
+    fn internal_access(&mut self, _token: &InternalToken) -> ();
 }
 
-impl<T: AuditablePayload + HasCategory + Validate> VaultElementTrait for Secret<T> {
+impl<T: AuditablePayload + HasCategory + Validate + RevealablePayload> VaultElementTrait
+    for Secret<T>
+{
     fn core(&self) -> &CoreSecret {
         Secret::core(self)
     }
@@ -77,6 +91,14 @@ impl<T: AuditablePayload + HasCategory + Validate> VaultElementTrait for Secret<
 
     fn enable(&mut self) -> () {
         self.core_mut().status = Enable;
+    }
+
+    fn internal_reveal(&self, _token: &InternalToken) -> String {
+        RevealablePayload::reveal_value(self)
+    }
+
+    fn internal_access(&mut self, _token: &InternalToken) -> () {
+        self.core_mut().access_count += 1;
     }
 }
 
@@ -123,7 +145,7 @@ impl Vault {
     // adding / basic searching
     pub fn add<T>(&mut self, secret: Secret<T>) -> Result<(), VaultError>
     where
-        T: AuditablePayload + HasCategory + Validate + 'static,
+        T: AuditablePayload + HasCategory + Validate + RevealablePayload + 'static,
     {
         // verifie id invariant
         if self.next_id == secret.core().id {
@@ -246,9 +268,24 @@ impl Vault {
     }
 
     // security
-    // pub fn reveal_secret(&mut self, id: u64, auth: &Auth) -> Result<String, VaultError> {
-    //     todo!()
-    // }
+    pub fn reveal_secret(&mut self, id: u64, auth: &Auth) -> Result<String, VaultError> {
+        if auth != &Admin {
+            return Err(VaultError::PermissionDenied);
+        }
+
+        let secret = self
+            .get_by_id_mut(id)
+            .ok_or(VaultError::NotFound(SearchKey::Id(id)))?;
+
+        if secret.core().status == Disable {
+            return Err(VaultError::OperationFailed);
+        }
+
+        let token = InternalToken { _private: () };
+        secret.internal_access(&token);
+
+        Ok(secret.internal_reveal(&token))
+    }
 
     // avancy searching
     pub fn find_first<F>(&self, predicate: F) -> Option<&dyn VaultElementTrait>

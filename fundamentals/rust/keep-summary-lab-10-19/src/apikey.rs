@@ -1,5 +1,6 @@
 use crate::{
     audit::AuditablePayload,
+    reveal::RevealablePayload,
     secret::{Category, HasCategory, RiskLevel, Secret},
     validate::{Validate, ValidationError},
 };
@@ -133,6 +134,12 @@ impl AuditablePayload for ApiKeyPayload {
         }
 
         RiskLevel::Low
+    }
+}
+
+impl RevealablePayload for ApiKeyPayload {
+    fn reveal_value(&self) -> String {
+        self.key.clone()
     }
 }
 

@@ -1,5 +1,6 @@
 use crate::{
     audit::AuditablePayload,
+    reveal::RevealablePayload,
     secret::{Category, HasCategory, RiskLevel, Secret},
     validate::{Validate, ValidationError},
 };
@@ -83,6 +84,12 @@ impl AuditablePayload for PasswordPayload {
         } else {
             RiskLevel::Low
         }
+    }
+}
+
+impl RevealablePayload for PasswordPayload {
+    fn reveal_value(&self) -> String {
+        self.raw.clone()
     }
 }
 
