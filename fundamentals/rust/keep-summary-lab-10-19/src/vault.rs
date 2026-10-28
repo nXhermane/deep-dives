@@ -323,7 +323,7 @@ impl Vault {
         .collect()
     }
 
-    pub fn distint_service(&self) -> Vec<String> {
+    pub fn distinct_service(&self) -> Vec<String> {
         self.secret_index
             .keys()
             .into_iter()
