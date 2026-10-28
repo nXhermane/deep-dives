@@ -1,6 +1,6 @@
 use crate::secret::{HasCategory, Secret};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Auth {
     Admin,
     Auditor,

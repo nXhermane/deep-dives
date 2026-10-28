@@ -43,14 +43,20 @@ pub struct SecretUpdate {
     pub expires_at: Option<Option<SimpleDate>>,
 }
 
+/// Jeton interne non instanciable en dehors de ce module (champ privé).
+/// Garantit que seules les méthodes du Vault peuvent autoriser l'accès et la révélation.
+pub struct InternalToken {
+    _private: (),
+}
+
 pub trait VaultElementTrait: Auditable + Validate {
     fn core(&self) -> &CoreSecret;
     fn category(&self) -> Category;
     fn apply_update(&mut self, update: &SecretUpdate) -> ();
     fn enable(&mut self) -> ();
     fn disable(&mut self) -> ();
-    fn reveal_secret(&self) -> String;
-    fn access(&mut self) -> ();
+    fn internal_reveal(&self, _token: &InternalToken) -> String;
+    fn internal_access(&mut self, _token: &InternalToken) -> ();
 }
 
 impl<T: AuditablePayload + HasCategory + Validate + RevealablePayload> VaultElementTrait
@@ -87,11 +93,11 @@ impl<T: AuditablePayload + HasCategory + Validate + RevealablePayload> VaultElem
         self.core_mut().status = Enable;
     }
 
-    fn reveal_secret(&self) -> String {
+    fn internal_reveal(&self, _token: &InternalToken) -> String {
         RevealablePayload::reveal_value(self)
     }
 
-    fn access(&mut self) -> () {
+    fn internal_access(&mut self, _token: &InternalToken) -> () {
         self.core_mut().access_count += 1;
     }
 }
@@ -262,8 +268,8 @@ impl Vault {
     }
 
     // security
-    pub fn reveal_secret(&mut self, id: u64, auth: Auth) -> Result<String, VaultError> {
-        if auth != Admin {
+    pub fn reveal_secret(&mut self, id: u64, auth: &Auth) -> Result<String, VaultError> {
+        if auth != &Admin {
             return Err(VaultError::PermissionDenied);
         }
 
@@ -275,9 +281,10 @@ impl Vault {
             return Err(VaultError::OperationFailed);
         }
 
-        secret.access();
+        let token = InternalToken { _private: () };
+        secret.internal_access(&token);
 
-        Ok(secret.reveal_secret())
+        Ok(secret.internal_reveal(&token))
     }
 
     // avancy searching
