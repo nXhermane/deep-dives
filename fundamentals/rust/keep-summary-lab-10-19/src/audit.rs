@@ -8,7 +8,7 @@ pub struct AuditEntry {
     pub masked_value: String,
     pub risk_level: RiskLevel,
 }
-    id: u64,
+}
     service: String,
     env: Environment,
     status: Status,
