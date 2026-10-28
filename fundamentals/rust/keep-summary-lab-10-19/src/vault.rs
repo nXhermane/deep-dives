@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    audit::{Auditable, AuditablePayload},
+    audit::{AuditEntry, Auditable, AuditablePayload},
     reveal::{
         Auth::{self, Admin},
         RevealablePayload,
@@ -311,6 +311,38 @@ impl Vault {
     // pub fn iter(&self) -> impl Iterator<Item = &dyn VaultElementTrait> {
     //     todo!()
     // }
+
+    pub fn audit_production_active(&self) -> Vec<AuditEntry> {
+        self.filter(&SecretFilter {
+            env: Some(Environment::Prod),
+            status: Some(Status::Enable),
+            ..Default::default()
+        })
+        .iter()
+        .map(|s| s.audit_entry())
+        .collect()
+    }
+
+    pub fn distint_service(&self) -> Vec<String> {
+        self.secret_index
+            .keys()
+            .into_iter()
+            .map(|s| s.clone())
+            .collect()
+    }
+
+    pub fn group_by_environment(&self) -> HashMap<Environment, Vec<&dyn VaultElementTrait>> {
+        let mut grouped_by_env: HashMap<Environment, Vec<&dyn VaultElementTrait>> = HashMap::new();
+
+        for secret in &self.secrets {
+            grouped_by_env
+                .entry(secret.core().env)
+                .or_default()
+                .push(secret.as_ref());
+        }
+
+        grouped_by_env
+    }
 
     // private methods
     fn get_by_id_mut(&mut self, id: u64) -> Option<&mut (dyn VaultElementTrait + '_)> {

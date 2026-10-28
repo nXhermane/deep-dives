@@ -1,6 +1,6 @@
 use crate::time::SimpleDate;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Environment {
     Dev,
     Prod,
