@@ -1,6 +1,13 @@
 use crate::secret::{Environment, HasCategory, RiskLevel, Secret, Status};
 
 pub struct AuditEntry {
+    pub id: u64,
+    pub service: String,
+    pub env: Environment,
+    pub status: Status,
+    pub masked_value: String,
+    pub risk_level: RiskLevel,
+}
     id: u64,
     service: String,
     env: Environment,
