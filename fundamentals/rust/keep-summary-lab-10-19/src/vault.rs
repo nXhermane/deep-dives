@@ -2,6 +2,10 @@ use std::collections::HashMap;
 
 use crate::{
     audit::{Auditable, AuditablePayload},
+    reveal::{
+        Auth::{self, Admin},
+        RevealablePayload,
+    },
     secret::{
         Category, CoreSecret, Environment, HasCategory, Secret,
         Status::{self, Disable, Enable},
@@ -45,9 +49,13 @@ pub trait VaultElementTrait: Auditable + Validate {
     fn apply_update(&mut self, update: &SecretUpdate) -> ();
     fn enable(&mut self) -> ();
     fn disable(&mut self) -> ();
+    fn reveal_secret(&self) -> String;
+    fn access(&mut self) -> ();
 }
 
-impl<T: AuditablePayload + HasCategory + Validate> VaultElementTrait for Secret<T> {
+impl<T: AuditablePayload + HasCategory + Validate + RevealablePayload> VaultElementTrait
+    for Secret<T>
+{
     fn core(&self) -> &CoreSecret {
         Secret::core(self)
     }
@@ -77,6 +85,14 @@ impl<T: AuditablePayload + HasCategory + Validate> VaultElementTrait for Secret<
 
     fn enable(&mut self) -> () {
         self.core_mut().status = Enable;
+    }
+
+    fn reveal_secret(&self) -> String {
+        RevealablePayload::reveal_value(self)
+    }
+
+    fn access(&mut self) -> () {
+        self.core_mut().access_count += 1;
     }
 }
 
@@ -123,7 +139,7 @@ impl Vault {
     // adding / basic searching
     pub fn add<T>(&mut self, secret: Secret<T>) -> Result<(), VaultError>
     where
-        T: AuditablePayload + HasCategory + Validate + 'static,
+        T: AuditablePayload + HasCategory + Validate + RevealablePayload + 'static,
     {
         // verifie id invariant
         if self.next_id == secret.core().id {
@@ -246,9 +262,23 @@ impl Vault {
     }
 
     // security
-    // pub fn reveal_secret(&mut self, id: u64, auth: &Auth) -> Result<String, VaultError> {
-    //     todo!()
-    // }
+    pub fn reveal_secret(&mut self, id: u64, auth: Auth) -> Result<String, VaultError> {
+        if auth != Admin {
+            return Err(VaultError::PermissionDenied);
+        }
+
+        let secret = self
+            .get_by_id_mut(id)
+            .ok_or(VaultError::NotFound(SearchKey::Id(id)))?;
+
+        if secret.core().status == Disable {
+            return Err(VaultError::OperationFailed);
+        }
+
+        secret.access();
+
+        Ok(secret.reveal_secret())
+    }
 
     // avancy searching
     pub fn find_first<F>(&self, predicate: F) -> Option<&dyn VaultElementTrait>

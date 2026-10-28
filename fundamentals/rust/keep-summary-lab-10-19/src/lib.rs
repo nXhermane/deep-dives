@@ -1,6 +1,7 @@
 pub mod apikey;
 pub mod audit;
 pub mod password;
+pub mod reveal;
 pub mod secret;
 pub mod time;
 pub mod validate;
