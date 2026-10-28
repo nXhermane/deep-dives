@@ -8,13 +8,6 @@ pub struct AuditEntry {
     pub masked_value: String,
     pub risk_level: RiskLevel,
 }
-}
-    service: String,
-    env: Environment,
-    status: Status,
-    masked_value: String,
-    risk_level: RiskLevel,
-}
 
 pub trait Auditable {
     fn resource_name(&self) -> &str;
