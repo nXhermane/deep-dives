@@ -119,7 +119,7 @@ pub fn pairs_to_map<K: Eq + Hash, V>(pairs: Vec<SecretPair<K, V>>) -> HashMap<K,
 
 pub fn compare_and_report<K, V>(first: &SecretPair<K, V>, second: &SecretPair<K, V>) -> bool
 where
-    K: Ord + Display + Clone,
+    K: PartialEq + Display,
     V: Auditable,
 {
     println!(
