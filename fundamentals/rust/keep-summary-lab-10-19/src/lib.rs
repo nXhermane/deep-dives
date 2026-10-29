@@ -1,5 +1,6 @@
 pub mod apikey;
 pub mod audit;
+pub mod generic;
 pub mod password;
 pub mod reveal;
 pub mod secret;
