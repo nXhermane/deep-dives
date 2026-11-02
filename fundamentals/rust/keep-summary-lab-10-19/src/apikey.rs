@@ -59,7 +59,7 @@ impl Validate for ApiKeyPayload {
         }
 
         let sep_pos = trimmed
-            .find(|c| c == '_' || c == '-')
+            .find(|c| ['_', '-'].contains(&c))
             .ok_or(ApiKeyValidationError::InvalidFormat)?;
 
         let prefix = &trimmed[..sep_pos];
@@ -72,7 +72,7 @@ impl Validate for ApiKeyPayload {
         if !(24..=64).contains(&body.len())
             || !body
                 .chars()
-                .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+                .all(|c| c.is_ascii_alphanumeric() || ['-', '_'].contains(&c))
         {
             return Err(ApiKeyValidationError::InvalidFormat.into());
         }
@@ -107,7 +107,7 @@ impl AuditablePayload for ApiKeyPayload {
         //     last_4
         // )
         // or
-        if let Some(pos) = self.key.find(|c| c == '_' || c == '-') {
+        if let Some(pos) = self.key.find(|c| ['-', '_'].contains(&c)) {
             let prefix = &self.key[..pos];
             let sep = &self.key[pos..=pos];
             let body = &self.key[pos + 1..];
