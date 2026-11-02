@@ -78,18 +78,18 @@ impl<T: AuditablePayload + HasCategory + Validate + RevealablePayload> VaultElem
             self.core_mut().title = title.clone();
         }
         if let Some(env) = &update.env {
-            self.core_mut().env = env.clone();
+            self.core_mut().env = *env;
         }
         if let Some(expire_at) = &update.expires_at {
-            self.core_mut().expires_at = expire_at.clone();
+            self.core_mut().expires_at = *expire_at;
         }
     }
 
-    fn disable(&mut self) -> () {
+    fn disable(&mut self) {
         self.core_mut().status = Disable;
     }
 
-    fn enable(&mut self) -> () {
+    fn enable(&mut self) {
         self.core_mut().status = Enable;
     }
 
@@ -97,7 +97,7 @@ impl<T: AuditablePayload + HasCategory + Validate + RevealablePayload> VaultElem
         RevealablePayload::reveal_value(self)
     }
 
-    fn internal_access(&mut self, _token: &InternalToken) -> () {
+    fn internal_access(&mut self, _token: &InternalToken) {
         self.core_mut().access_count += 1;
     }
 }
@@ -324,11 +324,7 @@ impl Vault {
     }
 
     pub fn distinct_service(&self) -> Vec<String> {
-        self.secret_index
-            .keys()
-            .into_iter()
-            .map(|s| s.clone())
-            .collect()
+        self.secret_index.keys().cloned().collect()
     }
 
     pub fn group_by_environment(&self) -> HashMap<Environment, Vec<&dyn VaultElementTrait>> {
@@ -390,5 +386,11 @@ impl SecretFilter {
             }
         }
         true
+    }
+}
+
+impl Default for Vault {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -36,8 +36,8 @@ impl<T: AuditablePayload + HasCategory> Auditable for Secret<T> {
         AuditEntry {
             id: core.id,
             service: core.service.clone(),
-            env: core.env.clone(),
-            status: core.status.clone(),
+            env: core.env,
+            status: core.status,
             masked_value: self.mask_value(),
             risk_level: self.risk_level(),
         }
