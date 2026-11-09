@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Stations d'articulation et pont du graphe</title>
+  <desc id="desc">Deux triangles A-B-C et D-E-F reliés par l'arête C-D. C et D sont des points d'articulation et C-D est un pont.</desc>
+  <defs>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#0f172a" flood-opacity=".12"/></filter>
+    <style>
+      .edge{stroke:#64748b;stroke-width:7;stroke-linecap:round;fill:none}
+      .bridge{stroke:#2563eb;stroke-width:11;stroke-linecap:round;fill:none}
+      .node{fill:#fff;stroke:#334155;stroke-width:5}
+      .critical{fill:#fee2e2;stroke:#dc2626;stroke-width:7}
+      .letter{font: bold 25px system-ui, sans-serif; fill:#0f172a; text-anchor:middle; dominant-baseline:middle}
+      .label{font: 600 23px system-ui, sans-serif; fill:#334155}
+      .small{font: 19px system-ui, sans-serif; fill:#475569}
+    </style>
+  </defs>
+  <rect width="1200" height="520" rx="24" fill="#f8fafc"/>
+  <text x="600" y="50" text-anchor="middle" font-family="system-ui,sans-serif" font-size="27" font-weight="700" fill="#0f172a">Réseau d'exemple : deux groupes reliés par une seule connexion</text>
+  <!-- Left triangle A-B-C -->
+  <path class="edge" d="M230 190 L390 115 L390 300 L230 190"/>
+  <!-- Right triangle D-E-F -->
+  <path class="edge" d="M810 190 L970 115 L970 300 L810 190"/>
+  <!-- Bridge C-D -->
+  <path class="bridge" d="M390 300 L810 300"/>
+  <!-- vertices -->
+  <g filter="url(#shadow)">
+    <circle class="node" cx="230" cy="190" r="35"/><circle class="node" cx="390" cy="115" r="35"/>
+    <circle class="critical" cx="390" cy="300" r="38"/>
+    <circle class="critical" cx="810" cy="300" r="38"/>
+    <circle class="node" cx="810" cy="190" r="35"/><circle class="node" cx="970" cy="115" r="35"/>
+  </g>
+  <g class="letter">
+    <text x="230" y="190">A</text><text x="390" y="115">B</text><text x="390" y="300">C</text>
+    <text x="810" y="300">D</text><text x="810" y="190">E</text><text x="970" y="115">F</text>
+  </g>
+  <text class="label" x="300" y="390" text-anchor="middle" fill="#b91c1c">C : station critique</text>
+  <text class="label" x="900" y="390" text-anchor="middle" fill="#b91c1c">D : station critique</text>
+  <path d="M390 350 L390 375 M810 350 L810 375" stroke="#dc2626" stroke-width="3" stroke-dasharray="6 6"/>
+  <rect x="400" y="420" width="400" height="58" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="600" y="457" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" font-weight="700" fill="#1d4ed8">C–D : connexion critique (pont)</text>
+</svg>
