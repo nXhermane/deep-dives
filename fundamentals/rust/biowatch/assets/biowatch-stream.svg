@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+<rect width="1200" height="700" rx="24" fill="#f7f8fa"/>
+<g font-family="Arial,sans-serif" fill="#172033">
+<text x="55" y="65" font-size="32" font-weight="bold">BIOWATCH — recherche multi-signatures dans un flux ADN</text>
+<text x="55" y="105" font-size="21" fill="#586579">Catalogue de motifs • flux découpé en blocs • occurrences chevauchantes</text>
+<rect x="55" y="145" width="290" height="210" rx="18" fill="white" stroke="#cbd5e1" stroke-width="2"/>
+<text x="80" y="185" font-size="23" font-weight="bold">Catalogue</text>
+<g font-size="20"><text x="85" y="235">ID 0</text><text x="180" y="235">ACG</text><text x="85" y="275">ID 1</text><text x="180" y="275">CG</text><text x="85" y="315">ID 2</text><text x="180" y="315">G</text></g>
+<path d="M365 250 H420 l-12 -10 m12 10 l-12 10" stroke="#738198" stroke-width="3" fill="none"/>
+<rect x="445" y="145" width="700" height="210" rx="18" fill="white" stroke="#cbd5e1" stroke-width="2"/>
+<text x="475" y="185" font-size="23" font-weight="bold">Séquence : ACGACGT</text>
+<g font-family="Arial,sans-serif" text-anchor="middle" font-size="18" fill="#586579">
+<text x="590" y="225">0</text><text x="665" y="225">1</text><text x="740" y="225">2</text><text x="815" y="225">3</text><text x="890" y="225">4</text><text x="965" y="225">5</text><text x="1040" y="225">6</text></g>
+<g font-family="Arial,sans-serif" text-anchor="middle" font-size="24" font-weight="bold" fill="#172033">
+<rect x="555" y="240" width="70" height="50" rx="8" fill="#edf1f7" stroke="#9aa8ba" stroke-width="2"/><text x="590" y="273">A</text><rect x="630" y="240" width="70" height="50" rx="8" fill="#edf1f7" stroke="#9aa8ba" stroke-width="2"/><text x="665" y="273">C</text><rect x="705" y="240" width="70" height="50" rx="8" fill="#edf1f7" stroke="#9aa8ba" stroke-width="2"/><text x="740" y="273">G</text><rect x="780" y="240" width="70" height="50" rx="8" fill="#edf1f7" stroke="#9aa8ba" stroke-width="2"/><text x="815" y="273">A</text><rect x="855" y="240" width="70" height="50" rx="8" fill="#edf1f7" stroke="#9aa8ba" stroke-width="2"/><text x="890" y="273">C</text><rect x="930" y="240" width="70" height="50" rx="8" fill="#edf1f7" stroke="#9aa8ba" stroke-width="2"/><text x="965" y="273">G</text><rect x="1005" y="240" width="70" height="50" rx="8" fill="#edf1f7" stroke="#9aa8ba" stroke-width="2"/><text x="1040" y="273">T</text></g>
+<rect x="555" y="305" width="292" height="35" rx="8" fill="#e5edff" stroke="#6585c7" stroke-width="2"/>
+<text x="701" y="329" font-family="Arial" font-size="18" text-anchor="middle" fill="#172033">Bloc 1 : ACGA</text>
+<rect x="855" y="305" width="220" height="35" rx="8" fill="#fff0d8" stroke="#c58a2b" stroke-width="2"/>
+<text x="965" y="329" font-family="Arial" font-size="18" text-anchor="middle" fill="#172033">Bloc 2 : CGT</text>
+<path d="M850 232 V348" stroke="#c58a2b" stroke-width="3" stroke-dasharray="8 7"/>
+<rect x="55" y="390" width="1090" height="250" rx="18" fill="white" stroke="#cbd5e1" stroke-width="2"/>
+<text x="85" y="435" font-family="Arial" font-size="23" font-weight="bold" fill="#172033">Occurrences — les motifs peuvent se chevaucher</text>
+<g font-family="Arial" font-size="19" fill="#586579">
+<text x="90" y="490">ACG</text><text x="90" y="540">CG</text><text x="90" y="590">ACGT</text></g>
+<g font-family="Arial" font-size="18" text-anchor="middle" fill="#172033">
+<rect x="200" y="462" width="225" height="38" rx="8" fill="#dcefe7" stroke="#32815f" stroke-width="2"/><text x="312" y="487">[0, 3)</text>
+<rect x="650" y="462" width="225" height="38" rx="8" fill="#dcefe7" stroke="#32815f" stroke-width="2"/><text x="762" y="487">[3, 6)</text>
+<rect x="275" y="512" width="150" height="38" rx="8" fill="#dcefe7" stroke="#32815f" stroke-width="2"/><text x="350" y="537">[1, 3)</text>
+<rect x="725" y="512" width="150" height="38" rx="8" fill="#dcefe7" stroke="#32815f" stroke-width="2"/><text x="800" y="537">[4, 6)</text>
+<rect x="650" y="562" width="300" height="38" rx="8" fill="#fff0d8" stroke="#c58a2b" stroke-width="2"/><text x="800" y="587">[3, 7) — traverse la frontière</text>
+</g>
+<text x="980" y="490" font-family="Arial" font-size="18" fill="#586579">Sortie : ID, début, fin</text>
+<text x="980" y="520" font-family="Arial" font-size="18" fill="#586579">Conserver l'état</text>
+<text x="980" y="548" font-family="Arial" font-size="18" fill="#586579">entre deux blocs</text>
+</g></svg>
